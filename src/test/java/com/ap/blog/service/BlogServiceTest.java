@@ -1,6 +1,6 @@
 package com.ap.blog.service;
 
-import com.ap.blog.events.UpdateBlogEvent;
+import com.ap.blog.events.blogs.UpdateBlogEvent;
 import com.ap.blog.model.Blog;
 import com.ap.blog.repository.BlogRepository;
 import org.junit.jupiter.api.Test;
@@ -15,6 +15,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
@@ -40,7 +41,7 @@ class BlogServiceTest {
         Blog expected = subject.addNewBlog(title, content);
         assertAll(
                 () -> assertNotNull(expected),
-                () -> assertEquals(expected.getContent(), ret.getContent()),
+                () -> assertEquals(expected.getMarkdownContent(), ret.getMarkdownContent()),
                 () -> assertEquals(expected.getTitle(), ret.getTitle())
         );
     }
@@ -59,9 +60,10 @@ class BlogServiceTest {
         Optional<Blog> expected = subject.findBlog(uuid);
 
         assertAll(
+                () -> assertTrue(expected.isPresent()),
                 () -> assertNotNull(expected.get()),
                 () -> assertEquals(expected.get(), ret),
-                () -> assertEquals(expected.get().getContent(), ret.getContent()),
+                () -> assertEquals(expected.get().getMarkdownContent(), ret.getMarkdownContent()),
                 () -> assertEquals(expected.get().getTitle(), ret.getTitle())
         );
     }
@@ -78,7 +80,7 @@ class BlogServiceTest {
         when(this.mockBlogRepository.save(any(Blog.class)))
                 .thenReturn(
                         Blog.builder().id(blog.getId())
-                                .content(blog.getContent())
+                                .content(blog.getMarkdownContent())
                                 .title(updatedTitle).build()
                 );
 
@@ -89,7 +91,7 @@ class BlogServiceTest {
         assertAll(
                 () -> assertNotNull(updatedBlog),
                 () -> assertEquals(updatedBlog.getTitle(), updatedTitle),
-                () -> assertEquals(updatedBlog.getContent(), blog.getContent()),
+                () -> assertEquals(updatedBlog.getMarkdownContent(), blog.getMarkdownContent()),
                 () -> assertEquals(updatedBlog.getId(), blog.getId())
         );
     }

@@ -1,6 +1,8 @@
 package com.ap.blog.service;
 
-import com.ap.blog.events.UpdateBlogEvent;
+import com.ap.blog.events.blogs.FetchType;
+import com.ap.blog.events.blogs.UpdateBlogEvent;
+import com.ap.blog.markdown.processors.CommonMarkService;
 import com.ap.blog.model.Blog;
 import com.ap.blog.repository.BlogRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +32,7 @@ public class BlogService {
         if (originalBlog.isPresent()) {
             Blog blog = originalBlog.get();
             blog.setTitle(event.getTitle() != null ? event.getTitle() : blog.getTitle());
-            blog.setContent(event.getContent() != null ? event.getContent() : blog.getContent());
+            blog.setContent(event.getContent() != null ? event.getContent() : blog.getMarkdownContent());
             return this.blogRepository.save(blog);
         }
         return originalBlog.get();

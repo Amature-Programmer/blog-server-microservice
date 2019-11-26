@@ -1,3 +1,5 @@
 spring:
   application:
-    name: blogs-server
+    name: blog-server
+  config:
+    name: ${spring.application.name}

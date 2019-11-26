@@ -1,10 +1,11 @@
 package com.ap.blog.controller;
 
-import com.ap.blog.events.NewBlogEvent;
-import com.ap.blog.events.UpdateBlogEvent;
+import com.ap.blog.events.blogs.FetchType;
+import com.ap.blog.events.blogs.NewBlogEvent;
+import com.ap.blog.events.blogs.UpdateBlogEvent;
+import com.ap.blog.markdown.processors.FlexMarkService;
 import com.ap.blog.model.Blog;
 import com.ap.blog.service.BlogService;
-import com.ap.blog.service.RenderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,7 +28,7 @@ import java.util.UUID;
 public class BlogController {
 
     private final BlogService blogService;
-    private final RenderService renderService;
+    private final FlexMarkService flexMarkService;
 
     @PostMapping("/blog")
     ResponseEntity postNewBlog(
@@ -61,13 +62,17 @@ public class BlogController {
         }
     }
 
+    /**
+     * @see BlogController {@link BlogController#getBlog(String, FetchType)}
+     * @deprecated
+     */
     @GetMapping("/blog/{id}/render")
     ResponseEntity renderBlog(@PathVariable @NotNull String id) {
         final UUID uuid = UUID.fromString(id);
         final Optional<Blog> optionalBlog = this.blogService.findBlog(uuid);
         if (optionalBlog.isPresent()) {
             Blog blog = optionalBlog.get();
-            String html = this.renderService.renderBlog(blog);
+            String html = this.flexMarkService.convertToHtml(blog);
             return ResponseEntity.status(HttpStatus.OK)
                     .contentType(MediaType.TEXT_HTML)
                     .body(html);

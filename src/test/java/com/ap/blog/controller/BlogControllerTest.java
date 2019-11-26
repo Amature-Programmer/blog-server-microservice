@@ -1,7 +1,7 @@
 package com.ap.blog.controller;
 
-import com.ap.blog.events.NewBlogEvent;
-import com.ap.blog.events.UpdateBlogEvent;
+import com.ap.blog.events.blogs.NewBlogEvent;
+import com.ap.blog.events.blogs.UpdateBlogEvent;
 import com.ap.blog.model.Blog;
 import com.ap.blog.service.BlogService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,7 +47,6 @@ class BlogControllerTest {
     @InjectMocks
     private BlogController subject;
 
-
     @Test
     void contextLoads() {
         assertNotNull(subject);
@@ -72,7 +71,7 @@ class BlogControllerTest {
 
         assertAll(
                 () -> assertNotNull(blog),
-                () -> assertEquals(blog.getContent(), content),
+                () -> assertEquals(blog.getMarkdownContent(), content),
                 () -> assertNotNull(blog.getId()),
                 () -> assertEquals(blog.getTitle(), title)
         );
@@ -112,7 +111,7 @@ class BlogControllerTest {
         Blog bg = objectMapper.readValue(result.getResponse().getContentAsString(), Blog.class);
         assertAll(
                 () -> assertNotNull(bg),
-                () -> assertEquals(bg.getContent(), content),
+                () -> assertEquals(bg.getMarkdownContent(), blog.getContent()),
                 () -> assertNotNull(bg.getId()),
                 () -> assertEquals(bg.getTitle(), blog.getTitle())
         );
@@ -175,7 +174,7 @@ class BlogControllerTest {
         Blog bg = objectMapper.readValue(result.getResponse().getContentAsString(), Blog.class);
         assertAll(
                 () -> assertNotNull(bg),
-                () -> assertEquals(bg.getContent(), content),
+                () -> assertEquals(bg.getMarkdownContent(), blog.getContent()),
                 () -> assertNotNull(bg.getId()),
                 () -> assertEquals(bg.getTitle(), updateBlogEvent.getTitle())
         );
