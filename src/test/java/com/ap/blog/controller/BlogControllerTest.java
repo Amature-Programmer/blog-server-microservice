@@ -64,11 +64,11 @@ class BlogControllerTest {
 
         MvcResult result = this.mvc.perform(
                 post("/blog")
-                        .content(this.objectMapper.writeValueAsString(blogEvent))
+                        .content(objectMapper.writeValueAsString(blogEvent))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
         ).andDo(print()).andExpect(status().isOk()).andReturn();
 
-        final Blog blog = this.objectMapper.readValue(result.getResponse().getContentAsString(), Blog.class);
+        final Blog blog = objectMapper.readValue(result.getResponse().getContentAsString(), Blog.class);
 
         assertAll(
                 () -> assertNotNull(blog),
@@ -87,7 +87,7 @@ class BlogControllerTest {
 
         MvcResult result = this.mvc.perform(
                 post("/blog")
-                        .content(this.objectMapper.writeValueAsString(blogEvent))
+                        .content(objectMapper.writeValueAsString(blogEvent))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
         ).andDo(print()).andExpect(status().is4xxClientError()).andReturn();
     }
@@ -101,31 +101,52 @@ class BlogControllerTest {
     }
 
     @Test
-    void getBlog() throws Exception {
-        final String title = "Hello World";
-        final String content = "# Hello World";
+    void getBlogAsDefaultJSON() throws Exception {
+        final Blog blog = addBlog();
 
-        final Blog blog = this.mockService.addNewBlog(title, content);
-
-        MvcResult result = this.mvc.perform(get("/blog/" + blog.getId().toString())).andDo(print())
+        MvcResult result = this.mvc.perform(
+                get("/blog/" + blog.getId().toString()).accept(MediaType.APPLICATION_JSON)
+        ).andDo(print())
                 .andExpect(status().is2xxSuccessful()).andReturn();
 
-        Blog bg = this.objectMapper.readValue(result.getResponse().getContentAsString(), Blog.class);
+        Blog bg = objectMapper.readValue(result.getResponse().getContentAsString(), Blog.class);
         assertAll(
                 () -> assertNotNull(bg),
                 () -> assertEquals(bg.getContent(), content),
                 () -> assertNotNull(bg.getId()),
-                () -> assertEquals(bg.getTitle(), title)
+                () -> assertEquals(bg.getTitle(), blog.getTitle())
         );
+    }
 
+    @Test
+    void getBlogAsHtml() throws Exception {
+        final Blog blog = addBlog();
+
+        MvcResult result = this.mvc.perform(
+                get("/blog/" + blog.getId().toString() + "?type=html").accept(MediaType.TEXT_HTML)
+        ).andDo(print())
+                .andExpect(status().is2xxSuccessful()).andReturn();
+        assertThat(result.getResponse().getContentAsString())
+                .containsSequence("<h1>")
+                .containsSequence("Hello World")
+                .containsSequence("</h1>");
+    }
+
+    @Test
+    void getBlogAsMarkdown() throws Exception {
+        final Blog blog = addBlog();
+
+        MvcResult result = this.mvc.perform(
+                get("/blog/" + blog.getId().toString() + "?type=md").accept(MediaType.TEXT_HTML)
+        ).andDo(print())
+                .andExpect(status().is2xxSuccessful()).andReturn();
+
+        assertThat(result.getResponse().getContentAsString()).isEqualTo("# Hello World");
     }
 
     @Test
     void renderBlog() throws Exception {
-        final String title = "Hello World";
-        final String content = "# Hello World";
-
-        final Blog blog = this.mockService.addNewBlog(title, content);
+        final Blog blog = addBlog();
 
         MvcResult result = this.mvc.perform(
                 get("/blog/" + blog.getId().toString() + "/render").accept(MediaType.TEXT_HTML_VALUE)
@@ -140,28 +161,30 @@ class BlogControllerTest {
 
     @Test
     void updateExistingBlog() throws Exception {
-        final String title = "Hello World";
-        final String content = "# Hello World";
-        final String updatedTitle = "First Blog!";
-
-        final Blog blog = this.mockService.addNewBlog(title, content);
+        final Blog blog = addBlog();
 
         UpdateBlogEvent updateBlogEvent = new UpdateBlogEvent();
-        updateBlogEvent.setTitle(updatedTitle);
+        updateBlogEvent.setTitle("First Blog!");
 
         MvcResult result = this.mvc.perform(
                 patch("/blog/" + blog.getId().toString())
-                        .content(this.objectMapper.writeValueAsString(updateBlogEvent))
+                        .content(objectMapper.writeValueAsString(updateBlogEvent))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
         ).andDo(print()).andExpect(status().is2xxSuccessful()).andReturn();
 
-        Blog bg = this.objectMapper.readValue(result.getResponse().getContentAsString(), Blog.class);
+        Blog bg = objectMapper.readValue(result.getResponse().getContentAsString(), Blog.class);
         assertAll(
                 () -> assertNotNull(bg),
                 () -> assertEquals(bg.getContent(), content),
                 () -> assertNotNull(bg.getId()),
-                () -> assertEquals(bg.getTitle(), updatedTitle)
+                () -> assertEquals(bg.getTitle(), updateBlogEvent.getTitle())
         );
+    }
+
+    private Blog addBlog() {
+        final String title = "Hello World";
+        final String content = "# Hello World";
+        return this.mockService.addNewBlog(title, content);
     }
 
 }

@@ -1,19 +1,15 @@
-package com.ap.blog.events;
+package com.ap.blog.events.blogs;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotNull;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class NewBlogEvent {
-    @NotNull
+public class UpdateBlogEvent {
     private String title;
-    @NotNull
     private String content;
 }
