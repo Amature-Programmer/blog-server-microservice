@@ -36,9 +36,11 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
 
         <!-- Devtools -->
         <dependency>
@@ -79,11 +81,6 @@
 
         <!-- Markdown Library -->
         <dependency>
-            <groupId>com.vladsch.flexmark</groupId>
-            <artifactId>flexmark-all</artifactId>
-            <version>0.50.44</version>
-        </dependency>
-        <dependency>
             <groupId>com.atlassian.commonmark</groupId>
             <artifactId>commonmark</artifactId>
             <version>${commonmark.verion}</version>
@@ -92,13 +89,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>com.atlassian.commonmark</groupId>
-                <artifactId>commonmark-parent</artifactId>
-                <version>${commonmark.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>

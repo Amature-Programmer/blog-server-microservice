@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @Slf4j
 class CommonMarkServiceTest {
 
-    private FlexMarkService subject = new FlexMarkService();
+    private CommonMarkService subject = new CommonMarkService();
 
     @Test
     void convertToHtml() {

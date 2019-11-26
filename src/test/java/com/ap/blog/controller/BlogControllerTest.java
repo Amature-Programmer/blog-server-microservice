@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -25,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -177,6 +179,26 @@ class BlogControllerTest {
                 () -> assertEquals(bg.getMarkdownContent(), blog.getContent()),
                 () -> assertNotNull(bg.getId()),
                 () -> assertEquals(bg.getTitle(), updateBlogEvent.getTitle())
+        );
+    }
+
+    @Test
+    void postBlogFromFile() throws Exception {
+        final String title = "Hello World";
+        final String content = "# Hello World";
+
+        MockMultipartFile multipartFile = new MockMultipartFile("content", "test.md",
+                MediaType.TEXT_MARKDOWN_VALUE, content.getBytes());
+        MvcResult result = this.mvc.perform(
+                multipart("/blog/upload").file(multipartFile).param("title", title)
+        ).andExpect(status().isOk()).andDo(print()).andReturn();
+
+        Blog bg = objectMapper.readValue(result.getResponse().getContentAsString(), Blog.class);
+        assertAll(
+                () -> assertNotNull(bg),
+                () -> assertEquals(bg.getMarkdownContent(), content),
+                () -> assertNotNull(bg.getId()),
+                () -> assertEquals(bg.getTitle(), title)
         );
     }
 

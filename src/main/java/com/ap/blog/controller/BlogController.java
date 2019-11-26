@@ -3,7 +3,7 @@ package com.ap.blog.controller;
 import com.ap.blog.events.blogs.FetchType;
 import com.ap.blog.events.blogs.NewBlogEvent;
 import com.ap.blog.events.blogs.UpdateBlogEvent;
-import com.ap.blog.markdown.processors.FlexMarkService;
+import com.ap.blog.markdown.processors.CommonMarkService;
 import com.ap.blog.model.Blog;
 import com.ap.blog.service.BlogService;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,7 +30,7 @@ import java.util.UUID;
 public class BlogController {
 
     private final BlogService blogService;
-    private final FlexMarkService flexMarkService;
+    private final CommonMarkService commonMarkService;
 
     @PostMapping("/blog")
     ResponseEntity postNewBlog(
@@ -36,6 +38,17 @@ public class BlogController {
     ) {
         return ResponseEntity.ok(this.blogService.addNewBlog(
                 blogEvent.getTitle(), blogEvent.getContent()
+        ));
+    }
+
+    @PostMapping(path = "/blog/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ResponseEntity postNewBlogFromFile(
+            @RequestParam("content") MultipartFile file,
+            @RequestParam("title") @NotNull String title
+    ) throws IOException {
+        String content = new String(file.getBytes());
+        return ResponseEntity.ok(this.blogService.addNewBlog(
+                title, content
         ));
     }
 
@@ -48,15 +61,9 @@ public class BlogController {
         final Optional<Blog> optionalBlog = this.blogService.findBlog(uuid);
         if (optionalBlog.isPresent()) {
             final Object content = this.blogService.convertTo(fetchType, optionalBlog.get());
-            switch (fetchType) {
-                case HTML:
-                    return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_HTML).body(content);
-                case MARKDOWN:
-                    return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_MARKDOWN).body(content);
-                case PDF:
-                    return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_PDF).body(content);
-            }
-            return ResponseEntity.ok(content);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .contentType(fetchType.getMediaType())
+                    .body(content);
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
@@ -72,7 +79,7 @@ public class BlogController {
         final Optional<Blog> optionalBlog = this.blogService.findBlog(uuid);
         if (optionalBlog.isPresent()) {
             Blog blog = optionalBlog.get();
-            String html = this.flexMarkService.convertToHtml(blog);
+            String html = this.commonMarkService.convertToHtml(blog);
             return ResponseEntity.status(HttpStatus.OK)
                     .contentType(MediaType.TEXT_HTML)
                     .body(html);
