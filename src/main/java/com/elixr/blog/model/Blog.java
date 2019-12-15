@@ -20,6 +20,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Blog implements MarkdownContent, Serializable {
+    
+    private static final long serialVersionUID = -7301770804415463812L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
