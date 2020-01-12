@@ -2,6 +2,10 @@ package com.elixir.blog.markdown.processors;
 
 import com.elixir.blog.markdown.MarkdownContent;
 import org.commonmark.Extension;
+import org.commonmark.ext.autolink.AutolinkExtension;
+import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension;
+import org.commonmark.ext.gfm.tables.TablesExtension;
+import org.commonmark.ext.ins.InsExtension;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
@@ -20,11 +24,18 @@ public class CommonMarkService implements MarkdownProcessor {
         parser = Parser.builder()
                 .extensions(this.getExtensions())
                 .build();
-        renderer = HtmlRenderer.builder().build();
+        renderer = HtmlRenderer.builder()
+                .extensions(this.getExtensions())
+                .build();
     }
 
     private List<Extension> getExtensions() {
-        return Arrays.asList();
+        return Arrays.asList(
+                TablesExtension.create(),
+                AutolinkExtension.create(),
+                StrikethroughExtension.create(),
+                InsExtension.create()
+        );
     }
 
     @Override
